@@ -35,6 +35,24 @@ def test_create_user(client: TestClient):
     }
 
 
+def test_read_user(client: TestClient):
+    response = client.get('/users/1')
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'id': 1,
+        'username': 'testusername',
+        'email': 'test@email.com',
+    }
+
+
+def test_read_user_not_found(client: TestClient):
+    response = client.get('/users/999')
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'User not found'}
+
+
 def test_read_users(client: TestClient):
     # Bad practice because it depends on the previous test...
     # It remains like this for didactic purposes
@@ -70,9 +88,29 @@ def test_update_user(client: TestClient):
     }
 
 
+def test_update_user_not_found(client: TestClient):
+    response = client.put(
+        url='/users/999',
+        json={
+            'id': 999,
+            'username': 'testusername999',
+            'email': 'test999@email.com',
+            'password': '1234999',
+        },
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'User not found'}
+
+
 def test_delete_user(client: TestClient):
     response = client.delete('/users/1')
 
     assert response.json() == {'message': 'User testusername2 deleted'}
 
-# TODO Escrever testes para os 404 nos endpoints de update e delete
+
+def test_delete_user_not_found(client: TestClient):
+    response = client.delete('/users/999')
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'User not found'}
