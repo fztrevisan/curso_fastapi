@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class Message(BaseModel):
@@ -11,17 +11,17 @@ class UserSchema(BaseModel):
     password: str
 
 
-# Temporario para a aula 03
-class UserDB(UserSchema):
-    id: int
-
-
 class UserPublic(BaseModel):
     """User public data with no password"""
 
     id: int
     username: str
     email: EmailStr
+    """ConfigDict is a Pydantic feature that allows you to configure the
+    model's behavior. In this case, from_attributes=True means that the model
+    will accept attributes from the input data as keyword arguments.
+    This is useful for creating models from dictionaries or other objects."""
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserList(BaseModel):
