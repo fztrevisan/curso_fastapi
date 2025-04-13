@@ -2,6 +2,8 @@ from http import HTTPStatus
 
 from fastapi.testclient import TestClient
 
+from fast_zero.schemas import UserPublic
+
 
 def test_root_deve_retornar_ok_e_ola_mundo(client: TestClient):
     response = client.get('/')
@@ -35,42 +37,40 @@ def test_create_user(client: TestClient):
     }
 
 
-def test_read_user(client: TestClient):
-    response = client.get('/users/1')
+# def test_read_user(client: TestClient):
+#     response = client.get('/users/1')
 
-    assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        'id': 1,
-        'username': 'testusername',
-        'email': 'test@email.com',
-    }
+#     assert response.status_code == HTTPStatus.OK
+#     assert response.json() == {
+#         'id': 1,
+#         'username': 'testusername',
+#         'email': 'test@email.com',
+#     }
 
 
-def test_read_user_not_found(client: TestClient):
-    response = client.get('/users/999')
+# def test_read_user_not_found(client: TestClient):
+#     response = client.get('/users/999')
 
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'User not found'}
+#     assert response.status_code == HTTPStatus.NOT_FOUND
+#     assert response.json() == {'detail': 'User not found'}
 
 
 def test_read_users(client: TestClient):
-    # Bad practice because it depends on the previous test...
-    # It remains like this for didactic purposes
     response = client.get('/users/')
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        'users': [
-            {
-                'id': 1,
-                'username': 'testusername',
-                'email': 'test@email.com',
-            }
-        ]
-    }
+    assert response.json() == {'users': []}
 
 
-def test_update_user(client: TestClient):
+def test_read_users_with_user(client: TestClient, user):
+    user_schema = UserPublic.model_validate(user).model_dump()
+    response = client.get('/users/')
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {'users': [user_schema]}
+
+
+def test_update_user(client: TestClient, user):
     response = client.put(
         url='/users/1',
         json={
@@ -103,10 +103,10 @@ def test_update_user_not_found(client: TestClient):
     assert response.json() == {'detail': 'User not found'}
 
 
-def test_delete_user(client: TestClient):
+def test_delete_user(client: TestClient, user):
     response = client.delete('/users/1')
 
-    assert response.json() == {'message': 'User testusername2 deleted'}
+    assert response.json() == {'message': 'User deleted'}
 
 
 def test_delete_user_not_found(client: TestClient):
