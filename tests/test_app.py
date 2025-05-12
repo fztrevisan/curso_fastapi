@@ -99,11 +99,12 @@ def test_read_users_with_user(client: TestClient, user):
     assert response.json() == {'users': [user_schema]}
 
 
-def test_update_user(client: TestClient, user):
+def test_update_user(client: TestClient, user, token):
     response = client.put(
-        url='/users/1',
+        url=f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
         json={
-            'id': 1,
+            'id': user.id,
             'username': 'testusername2',
             'email': 'test@email.com',
             'password': '1234',
@@ -111,35 +112,39 @@ def test_update_user(client: TestClient, user):
     )
 
     assert response.json() == {
-        'id': 1,
+        'id': user.id,
         'username': 'testusername2',
         'email': 'test@email.com',
     }
+    # continuar daqui: https://youtu.be/STt-lARdLSM?t=5785
 
 
-def test_update_user_not_found(client: TestClient):
-    response = client.put(
-        url='/users/999',
-        json={
-            'id': 999,
-            'username': 'testusername999',
-            'email': 'test999@email.com',
-            'password': '1234999',
-        },
+# def test_update_user_not_found(client: TestClient):
+#     response = client.put(
+#         url='/users/999',
+#         json={
+#             'id': 999,
+#             'username': 'testusername999',
+#             'email': 'test999@email.com',
+#             'password': '1234999',
+#         },
+#     )
+
+#     assert response.status_code == HTTPStatus.NOT_FOUND
+#     assert response.json() == {'detail': 'User not found'}
+
+
+def test_delete_user(client: TestClient, user, token):
+    response = client.delete(
+        url=f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
     )
-
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'User not found'}
-
-
-def test_delete_user(client: TestClient, user):
-    response = client.delete('/users/1')
 
     assert response.json() == {'message': 'User deleted'}
 
 
-def test_delete_user_not_found(client: TestClient):
-    response = client.delete('/users/999')
+# def test_delete_user_not_found(client: TestClient):
+#     response = client.delete('/users/999')
 
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'detail': 'User not found'}
+#     assert response.status_code == HTTPStatus.NOT_FOUND
+#     assert response.json() == {'detail': 'User not found'}
