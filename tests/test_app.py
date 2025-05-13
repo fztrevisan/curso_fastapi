@@ -119,19 +119,20 @@ def test_update_user(client: TestClient, user, token):
     # continuar daqui: https://youtu.be/STt-lARdLSM?t=5785
 
 
-# def test_update_user_not_found(client: TestClient):
-#     response = client.put(
-#         url='/users/999',
-#         json={
-#             'id': 999,
-#             'username': 'testusername999',
-#             'email': 'test999@email.com',
-#             'password': '1234999',
-#         },
-#     )
+def test_update_user_not_found(client: TestClient, token):
+    response = client.put(
+        url='/users/999',
+        headers={'Authorization': f'Bearer {token}'},
+        json={
+            'id': 999,
+            'username': 'testusername999',
+            'email': 'test999@email.com',
+            'password': '1234999',
+        },
+    )
 
-#     assert response.status_code == HTTPStatus.NOT_FOUND
-#     assert response.json() == {'detail': 'User not found'}
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {'detail': 'Not enough permissions'}
 
 
 def test_delete_user(client: TestClient, user, token):
@@ -143,8 +144,22 @@ def test_delete_user(client: TestClient, user, token):
     assert response.json() == {'message': 'User deleted'}
 
 
-# def test_delete_user_not_found(client: TestClient):
-#     response = client.delete('/users/999')
+def test_delete_user_not_found(client: TestClient, token):
+    response = client.delete(
+        '/users/999',
+        headers={'Authorization': f'Bearer {token}'},
+    )
 
-#     assert response.status_code == HTTPStatus.NOT_FOUND
-#     assert response.json() == {'detail': 'User not found'}
+    assert response.status_code == HTTPStatus.FORBIDDEN
+    assert response.json() == {'detail': 'Not enough permissions'}
+
+
+def test_login_for_access_token_bad_request(client: TestClient, session):
+    data = {'username': 'non-existent@email.com', 'password': '123456'}
+    response = client.post(
+        '/token',
+        data=data
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json() == {'detail': 'Incorrect email or password'}
