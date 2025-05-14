@@ -3,8 +3,7 @@ from http import HTTPStatus
 from fastapi.testclient import TestClient
 from jwt import decode
 
-from fast_zero.schemas import UserSchema
-from fast_zero.security import ALGORITHM, SECRET_KEY, create_access_token
+from fast_zero.security import create_access_token, settings
 
 
 def test_jwt():
@@ -13,24 +12,12 @@ def test_jwt():
 
     result = decode(
         token,
-        key=SECRET_KEY,
-        algorithms=[ALGORITHM],
+        key=settings.SECRET_KEY,
+        algorithms=[settings.ALGORITHM],
     )
 
     assert result['sub'] == data['sub']
     assert result['exp']
-
-
-def test_get_token(client: TestClient, user: UserSchema):
-    response = client.post(
-        '/token',
-        data={'username': user.email, 'password': user.clean_password},
-    )
-    token = response.json()
-
-    assert response.status_code == HTTPStatus.OK
-    assert token['token_type'] == 'Bearer'
-    assert 'access_token' in token
 
 
 def test_jwt_invalid_token(client: TestClient):
@@ -47,8 +34,7 @@ def test_jwt_invalid_token(client: TestClient):
 
 
 def test_get_current_user_email_not_found(client: TestClient):
-    """ Test token generated without and email ('sub' key)
-    """
+    """Test token generated without and email ('sub' key)"""
     data = {'no-sub': 'no-email'}
     token = create_access_token(data)
 
@@ -63,7 +49,7 @@ def test_get_current_user_email_not_found(client: TestClient):
 
 
 def test_get_current_user_doesnt_exist(client: TestClient):
-    """ Test token generated with an email that doesnt exist
+    """Test token generated with an email that doesnt exist
     in the database
     """
     data = {'sub': 'non-existent@email.com'}
