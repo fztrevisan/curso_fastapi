@@ -12,13 +12,11 @@ from sqlalchemy.orm import Session
 
 from fast_zero.database import get_session
 from fast_zero.models import User
+from fast_zero.settings import Settings
 
 pwd_context = PasswordHash.recommended()
-oath2_scheme = OAuth2PasswordBearer(tokenUrl='/token')
-
-SECRET_KEY = 'your-secret-key'
-ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+oath2_scheme = OAuth2PasswordBearer(tokenUrl='/auth/token')
+settings = Settings()
 
 
 def get_password_hash(password: str) -> str:
@@ -38,11 +36,13 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_access_token(data: dict):
     to_encode = data.copy()
     expire = datetime.now(ZoneInfo('UTC')) + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
 
     to_encode.update({'exp': expire})
-    encoded_jwt = jwt.encode(to_encode, key=SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(
+        to_encode, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
     return encoded_jwt
 
 
@@ -58,8 +58,8 @@ def get_current_user(
     try:
         payload = jwt.decode(
             token,
-            key=SECRET_KEY,
-            algorithms=[ALGORITHM],
+            key=settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
         )
     except PyJWTError:
         raise credentials_exception
