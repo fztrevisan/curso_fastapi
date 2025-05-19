@@ -77,12 +77,14 @@ def test_read_users(client: TestClient):
     assert response.json() == {'users': []}
 
 
-def test_read_users_with_user(client: TestClient, user):
+def test_read_users_with_user(client: TestClient, user, other_user):
     user_schema = UserPublic.model_validate(user).model_dump()
+    other_user_schema = UserPublic.model_validate(other_user).model_dump()
+    
     response = client.get('/users/')
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {'users': [user_schema]}
+    assert response.json() == {'users': [user_schema, other_user_schema]}
 
 
 def test_update_user(client: TestClient, user, token):
