@@ -90,7 +90,6 @@ def test_update_user(client: TestClient, user, token):
         url=f'/users/{user.id}',
         headers={'Authorization': f'Bearer {token}'},
         json={
-            'id': user.id,
             'username': 'testusername2',
             'email': 'test@email.com',
             'password': '1234',
@@ -104,15 +103,14 @@ def test_update_user(client: TestClient, user, token):
     }
 
 
-def test_update_user_not_found(client: TestClient, token):
+def test_update_user_with_wrong_user(client: TestClient, other_user, token):
     response = client.put(
-        url='/users/999',
+        url=f'/users/{other_user.id}',
         headers={'Authorization': f'Bearer {token}'},
         json={
-            'id': 999,
-            'username': 'testusername999',
-            'email': 'test999@email.com',
-            'password': '1234999',
+            'username': 'bob',
+            'email': 'bob@email.com',
+            'password': 'mynewpassword',
         },
     )
 
@@ -129,9 +127,9 @@ def test_delete_user(client: TestClient, user, token):
     assert response.json() == {'message': 'User deleted'}
 
 
-def test_delete_user_not_found(client: TestClient, token):
+def test_delete_user_with_wrong_user(client: TestClient, other_user, token):
     response = client.delete(
-        '/users/999',
+        f'/users/{other_user.id}',
         headers={'Authorization': f'Bearer {token}'},
     )
 
