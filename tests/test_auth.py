@@ -79,7 +79,9 @@ def test_refresh_token(client: TestClient, token):
     assert data['token_type'] == 'Bearer'
 
 
-def test_refresh_token_expired_after_time(client: TestClient, user: UserSchema):
+def test_refresh_token_expired_after_time(
+    client: TestClient, user: UserSchema
+):
     with freeze_time('2021-01-14 17:00:00'):
         # Gerar o token às 17:00
         response = client.post(
