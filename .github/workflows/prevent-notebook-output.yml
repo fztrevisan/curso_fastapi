@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0 # Fetches all history for all branches and tags
 
       - name: Verify that notebooks are clean
-        uses: ResearchSoftwareActions/EnsureCleanNotebooksAction@v1.1
+        uses: ResearchSoftwareActions/EnsureCleanNotebooksAction@v1
           
       - name: Provide rejection message
         if: ${{ failure() }} # This step will only run if the previous step fails
