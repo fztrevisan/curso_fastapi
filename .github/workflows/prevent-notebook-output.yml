@@ -18,10 +18,6 @@ jobs:
 
       - name: Verify that notebooks are clean
         uses: ResearchSoftwareActions/EnsureCleanNotebooksAction@v1.1
-        with:
-          # This action fails if notebooks have output cells.
-          # You can customize which checks to disable if needed.
-          # disable-checks: 'outputs,execution_count'
           
       - name: Provide rejection message
         if: ${{ failure() }} # This step will only run if the previous step fails
