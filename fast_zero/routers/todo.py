@@ -29,5 +29,5 @@ def create_todo(
     session.add(db_todo)
     session.commit()
     session.refresh(db_todo)
-    
+
     return db_todo
