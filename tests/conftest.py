@@ -34,7 +34,7 @@ class TodoFactory(factory.Factory):
     user_id = 1
 
 
-# FONTES: 
+# FONTES:
 # 1. https://stackoverflow.com/questions/29116718/how-to-mocking-created-time-in-sqlalchemy
 # 2. https://docs.sqlalchemy.org/en/20/orm/events.html#sqlalchemy.orm.MapperEvents
 @contextmanager
