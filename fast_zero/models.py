@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import StrEnum, auto
 
 from sqlalchemy import ForeignKey, func
-from sqlalchemy.orm import Mapped, mapped_column, registry
+from sqlalchemy.orm import Mapped, mapped_column, registry, relationship
 
 table_registry = registry()
 
@@ -27,6 +27,10 @@ class User:
         init=False, server_default=func.now()
     )
 
+    todos: Mapped[list['Todo']] = relationship(
+        init=False, back_populates='user', cascade='all, delete-orphan'
+    )
+
 
 @table_registry.mapped_as_dataclass
 class Todo:
@@ -41,3 +45,4 @@ class Todo:
     )
 
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    user: Mapped[User] = relationship(init=False, back_populates='todos')
