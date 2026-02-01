@@ -143,7 +143,32 @@ def test_list_todos_filter_combined_should_return_5_todos(
 
     assert len(response.json()['todos']) == expected_todos
 
-    # TODO criar outros testes combinando filtros!!!!
+
+def test_list_todos_should_return_all_expected_fields(
+    session, user, client, token, mock_db_time
+):
+    with mock_db_time(model=Todo) as fake_time:
+        todo = TodoFactory(user_id=user.id)
+        session.add(todo)
+        session.commit()
+
+    session.refresh(todo)
+
+    response = client.get(
+        '/todos/',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+
+    assert response.json()['todos'] == [
+        {
+            'id': todo.id,
+            'title': todo.title,
+            'description': todo.description,
+            'state': todo.state,
+            'created_at': fake_time.isoformat(),
+            'updated_at': fake_time.isoformat(),
+        }
+    ]
 
 
 def test_delete_todo(session, client, user, token):
