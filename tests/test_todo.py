@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+import pytest
+
 from fast_zero.models import Todo, TodoState
 from tests.conftest import TodoFactory
 
@@ -54,62 +56,29 @@ def test_list_todos_pagination_should_return_2_todos(
     assert len(response.json()['todos']) == expected_todos
 
 
-# Na aula é feito assim, mas poderia fazer com 'parametrize'
-# TODO Refatorar
-def test_list_todos_filter_title_should_return_5_todos(
-    session, client, user, token
+@pytest.mark.parametrize(
+    'field',
+    [
+        {'title': 'Test todo 1'},
+        {'description': 'Description123'},
+        {'state': TodoState.draft},
+    ],
+)
+def test_list_todos_filter_fields_should_return_5_todos(
+    session, client, user, token, field: dict
 ):
     expected_todos = 5
     session.bulk_save_objects(
-        TodoFactory.create_batch(5, user_id=user.id, title='Test todo 1')
+        TodoFactory.create_batch(5, user_id=user.id, **field)
     )
     session.commit()
 
     response = client.get(
-        '/todos/?title=Test%20todo%201',
+        f'/todos/?{list(field.keys())[0]}={list(field.values())[0]}',
         headers={'Authorization': f'Bearer {token}'},
     )
 
     assert len(response.json()['todos']) == expected_todos
-
-
-def test_list_todos_filter_description_should_return_5_todos(
-    session, user, client, token
-):
-    expected_todos = 5
-    session.bulk_save_objects(
-        TodoFactory.create_batch(
-            5, user_id=user.id, description='Description123'
-        )
-    )
-    session.commit()
-
-    response = client.get(
-        '/todos/?description=desc',
-        headers={'Authorization': f'Bearer {token}'},
-    )
-
-    assert len(response.json()['todos']) == expected_todos
-
-
-def test_list_todos_filter_state_should_return_5_todos(
-    session, user, client, token
-):
-    expected_todos = 5
-    session.bulk_save_objects(
-        TodoFactory.create_batch(5, user_id=user.id, state=TodoState.draft)
-    )
-    session.commit()
-
-    response = client.get(
-        '/todos/?state=draft',
-        headers={'Authorization': f'Bearer {token}'},
-    )
-
-    assert len(response.json()['todos']) == expected_todos
-
-
-# ---------------------------------------------------------------
 
 
 def test_list_todos_filter_combined_should_return_5_todos(
