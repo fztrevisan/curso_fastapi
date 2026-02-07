@@ -102,19 +102,26 @@ def client(session):
 #     table_registry.metadata.drop_all(engine)
 
 
+# scope=session para criar o banco uma vez por sessão de teste,
+# e não para cada teste individual
+@pytest.fixture(scope='session')
+def engine():
+    with PostgresContainer('postgres:16', driver='psycopg') as postgres:
+        _engine = create_engine(postgres.get_connection_url())
+
+        with _engine.begin():
+            yield _engine
+
+
 @pytest.fixture
-def session():
-    with PostgresContainer(
-        image='postgres:18.1', driver='psycopg'
-    ) as postgres:
-        engine = create_engine(postgres.get_connection_url())
-        table_registry.metadata.create_all(engine)
+def session(engine):
+    table_registry.metadata.create_all(engine)
 
-        with Session(engine) as session:
-            yield session
-            session.rollback()
+    with Session(engine) as session:
+        yield session
+        session.rollback()
 
-        table_registry.metadata.drop_all(engine)
+    table_registry.metadata.drop_all(engine)
 
 
 @pytest.fixture
