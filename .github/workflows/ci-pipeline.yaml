@@ -23,4 +23,4 @@ jobs:
           run: poetry
         
         - name: Run tests
-          run: poetry run pytest -vv -s
+          run: poetry run task test
