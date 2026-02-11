@@ -1,0 +1,26 @@
+name: CI Pipeline | DEV
+
+on:
+  - pull_request
+  - push
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Install python
+          uses: actions/setup-python@v5
+          with:
+            python-version: '3.12'
+
+        - name: Install poetry
+          run: pipx install poetry
+          
+        - name: Install project dependencies
+          run: poetry
+        
+        - name: Run tests
+          run: poetry run pytest -vv -s
