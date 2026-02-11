@@ -7,12 +7,15 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
-from sqlalchemy.pool import StaticPool
+from testcontainers.postgres import PostgresContainer
 
+# from sqlalchemy.pool import StaticPool
 from fast_zero.app import app
 from fast_zero.database import get_session
 from fast_zero.models import Todo, TodoState, User, table_registry
 from fast_zero.security import get_password_hash
+
+# from fast_zero.settings import Settings
 
 
 class UserFactory(factory.Factory):
@@ -65,19 +68,58 @@ def client(session):
     app.dependency_overrides.clear()
 
 
+# Fixture usada antes do postgres, com SQLite em memória.
+# Deixei aqui para referência, mas não é mais usada.
+# Para voltar a usar reativar o import do StaticPool
+# @pytest.fixture
+# def session():
+#     engine = create_engine(
+#         url='sqlite:///:memory:',
+#         # avoid "sqlite3.ProgrammingError: SQLite objects created in a thread
+#         # can only be used in that same thread."
+#         connect_args={'check_same_thread': False},
+#         poolclass=StaticPool,
+#     )
+#     table_registry.metadata.create_all(engine)
+
+#     with Session(engine) as session:
+#         yield session
+
+#     table_registry.metadata.drop_all(engine)
+
+
+# Usa o banco certo mas depende do postgres estar rodando.
+# Deleta as tabelas toda vez que rodar os testes
+# Voltar o import Settings para usar
+# @pytest.fixture
+# def session():
+#     engine = create_engine(Settings().DATABASE_URL)
+#     table_registry.metadata.create_all(engine)
+
+#     with Session(engine) as session:
+#         yield session
+
+#     table_registry.metadata.drop_all(engine)
+
+
+# scope=session para criar o banco uma vez por sessão de teste,
+# e não para cada teste individual
+@pytest.fixture(scope='session')
+def engine():
+    with PostgresContainer('postgres:16', driver='psycopg') as postgres:
+        _engine = create_engine(postgres.get_connection_url())
+
+        with _engine.begin():
+            yield _engine
+
+
 @pytest.fixture
-def session():
-    engine = create_engine(
-        url='sqlite:///:memory:',
-        # avoid "sqlite3.ProgrammingError: SQLite objects created in a thread
-        # can only be used in that same thread."
-        connect_args={'check_same_thread': False},
-        poolclass=StaticPool,
-    )
+def session(engine):
     table_registry.metadata.create_all(engine)
 
     with Session(engine) as session:
         yield session
+        session.rollback()
 
     table_registry.metadata.drop_all(engine)
 
