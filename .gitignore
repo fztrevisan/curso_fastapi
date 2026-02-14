@@ -3,6 +3,7 @@ database.db
 
 # extras
 .extras
+.flyio
 
 # ruff
 .ruff_cache
