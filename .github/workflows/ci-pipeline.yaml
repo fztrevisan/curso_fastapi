@@ -1,8 +1,12 @@
 name: CI Pipeline | DEV
 
 on:
-  - pull_request
-  - push
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
 
 env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
