@@ -1,0 +1,33 @@
+name: CI Pipeline | DEV
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  ALGORITHM: ${{ secrets.ALGORITHM }}
+  ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Install python
+          uses: actions/setup-python@v5
+          with:
+            python-version: '3.12'
+
+        - name: Install poetry
+          run: pipx install poetry
+          
+        - name: Install project dependencies
+          run: poetry install
+        
+        - name: Run tests
+          run: poetry run pytest -vv -s

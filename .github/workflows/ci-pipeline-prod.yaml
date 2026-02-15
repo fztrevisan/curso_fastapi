@@ -1,9 +1,6 @@
-name: CI Pipeline | DEV
+name: CI/CD Pipeline | PROD
 
 on:
-  pull_request:
-    branches:
-      - main
   push:
     branches:
       - main
@@ -34,3 +31,13 @@ jobs:
         
         - name: Run tests
           run: poetry run pytest -vv -s
+  deploy-app:
+    needs: tests
+    runs-on: ubuntu-latest
+    concurrency: deploy-group    # optional: ensure only one action runs at a time
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --local-only --ha=false
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
