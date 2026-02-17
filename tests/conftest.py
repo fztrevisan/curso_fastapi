@@ -58,14 +58,16 @@ def client(session):
     def get_session_override():
         """This function will be called instead of the original `get_session()`
 
-        Calls the session fixture to get the sqlite memory session"""
+        Calls the session fixture to get the local postgres memory session"""
         return session
 
     with TestClient(app) as client:
         app.dependency_overrides[get_session] = get_session_override
+        app.state.limiter.enabled = False
         yield client
 
     app.dependency_overrides.clear()
+    app.state.limiter.enabled = True
 
 
 # Fixture usada antes do postgres, com SQLite em memória.
