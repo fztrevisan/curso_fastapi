@@ -14,6 +14,7 @@ limiter = Limiter(key_func=get_remote_address, default_limits=['5/minute'])
 
 app = FastAPI()
 # adds rate limit to all routes in the app
+# FIXME -- Adição de rate limit quebra os testes unitários!!
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
