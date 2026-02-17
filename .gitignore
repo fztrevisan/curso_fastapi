@@ -5,6 +5,9 @@ database.db
 .extras
 .flyio
 
+# ssh
+.ssh*
+
 # ruff
 .ruff_cache
 
