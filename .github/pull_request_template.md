@@ -6,11 +6,12 @@
 <!--
 Remova esse comentário e descreva aqui o resumo do PR.
 -->
-
-**Detalhamento**
+<details>
+<summary>Detalhamento</summary>
 <!--
 Remova esse comentário e descreva aqui o resumo do PR.
 -->
+</details>
 
 ## Checklit do DEV
 
