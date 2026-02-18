@@ -3,18 +3,13 @@ from http import HTTPStatus
 from fastapi.testclient import TestClient
 
 
-def test_root_deve_retornar_ok_e_ola_mundo(client: TestClient):
+def test_root_deve_retornar_ok_e_landing_page(client: TestClient):
     response = client.get('/')
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {'message': 'Olá Mundo!'}
-
-
-def test_formatted_retorna_ok_e_ola_mundo_em_html(client: TestClient):
-    response = client.get('/formatted')
-
-    assert response.status_code == HTTPStatus.OK
-    assert 'Olá mundo' in response.text
+    assert 'text/html' in response.headers['content-type']
+    assert 'Fast Zero API' in response.text
+    assert 'Fernando Trevisan' in response.text
 
 
 def test_login_for_access_token_bad_request(client: TestClient, session):
