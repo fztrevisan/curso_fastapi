@@ -1,6 +1,25 @@
-### 🔨 O que esse PR faz?
+# <Título do PR>
+
+## Descrição
+
+**Resumo**
+<!--
+Remova esse comentário e descreva aqui o resumo do PR.
+-->
+
+**Detalhamento**
+<!--
+Remova esse comentário e descreva aqui o resumo do PR.
+-->
+
+## Checklit do DEV
+
+- [ ] O código foi testado?
+- [ ] Os testes unitários foram atualizados?
+- [ ] As alterações foram documentadas?
+
+## Evidências
 
 <!--
-Remova esse comentário e descreva aqui qual o objetivo desse PR.
-Inclua, se fizer sentido, imagens/videos que demonstre a mudança.
+Adicione aqui as evidências caso sejam necessárias ou apague a sessão
 -->
