@@ -55,23 +55,68 @@ def test_create_user_rate_limit(
     }
 
 
-# Test oauth endpoints
-def test_list_todos_rate_limit(client_with_rate_limit, token, rate_limit):
-    # A fixture token já faz 1 chamada no endpoint de auth
-    # O loop abaixo deve fazer só mais 4
-    # FIXME teste dando erro
-    for _ in range(rate_limit - 2):
+# Test protected endpoints
+def test_list_todos_rate_limit(
+    client_with_rate_limit: TestClient,
+    token_with_rate_limit: str,
+    rate_limit: int,
+):
+    for _ in range(rate_limit):
         response = client_with_rate_limit.get(
             '/todos/',
-            headers={'Authorization': f'Bearer {token}'},
+            headers={'Authorization': f'Bearer {token_with_rate_limit}'},
         )
-
         assert response.status_code == HTTPStatus.OK
         assert response.json()['todos'] == []
 
     response = client_with_rate_limit.get(
         '/todos/',
-        headers={'Authorization': f'Bearer {token}'},
+        headers={'Authorization': f'Bearer {token_with_rate_limit}'},
+    )
+    assert response.status_code == HTTPStatus.TOO_MANY_REQUESTS
+    assert response.json() == {
+        'error': f'Rate limit exceeded: {rate_limit} per 1 minute'
+    }
+
+
+# Test calling multiple protected endpoints
+def test_call_multiple_protected_endpoints(
+    client_with_rate_limit: TestClient,
+    token_with_rate_limit: str,
+    rate_limit: int,
+):
+    """Cria 2 ToDos e faz 3 GETs dentro do limite.
+    Depois faz 1 GET fora do limite para causar erro.
+    """
+    for i in range(2):
+        # Create todo
+        response = client_with_rate_limit.post(
+            '/todos/',
+            headers={'Authorization': f'Bearer {token_with_rate_limit}'},
+            json={
+                'title': f'Test todo {i}',
+                'description': f'Test todo description {i}',
+                'state': 'draft',
+            },
+        )
+        assert response.status_code == HTTPStatus.CREATED
+
+        # List todos
+        response = client_with_rate_limit.get(
+            '/todos/',
+            headers={'Authorization': f'Bearer {token_with_rate_limit}'},
+        )
+        assert response.status_code == HTTPStatus.OK
+    # 5o request (ainda dentro do limite)
+    response = client_with_rate_limit.get(
+        '/todos/',
+        headers={'Authorization': f'Bearer {token_with_rate_limit}'},
+    )
+    assert response.status_code == HTTPStatus.OK
+    # 6o request (fora do limite)
+    response = client_with_rate_limit.get(
+        '/todos/',
+        headers={'Authorization': f'Bearer {token_with_rate_limit}'},
     )
     assert response.status_code == HTTPStatus.TOO_MANY_REQUESTS
     assert response.json() == {
