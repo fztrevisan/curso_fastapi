@@ -55,6 +55,8 @@ def _mock_db_time(*, model, fake_time=datetime(2024, 1, 1)):
 
 @pytest.fixture
 def client(session):
+    """Client with rate limiting disabled and local db"""
+
     def get_session_override():
         """This function will be called instead of the original `get_session()`
 
@@ -68,6 +70,29 @@ def client(session):
 
     app.dependency_overrides.clear()
     app.state.limiter.enabled = True
+
+
+@pytest.fixture
+def client_with_rate_limit(session):
+    """Client with rate limiting enabled for testing rate limit behavior."""
+
+    def get_session_override():
+        return session
+
+    with TestClient(app) as client:
+        app.dependency_overrides[get_session] = get_session_override
+        # Set rate limit
+        app.state.limiter.enabled = True
+        app.state.limiter.reset()
+        yield client
+
+    app.dependency_overrides.clear()
+    app.state.limiter.reset()
+
+
+@pytest.fixture
+def rate_limit() -> int:
+    return 5
 
 
 # Fixture usada antes do postgres, com SQLite em memória.
