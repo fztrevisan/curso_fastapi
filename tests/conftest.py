@@ -188,6 +188,16 @@ def token(client, user):
 
 
 @pytest.fixture
+def token_with_rate_limit(client_with_rate_limit, user):
+    response = client_with_rate_limit.post(
+        '/auth/token',
+        data={'username': user.email, 'password': user.clean_password},
+    )
+
+    return response.json()['access_token']
+
+
+@pytest.fixture
 def mock_db_time():
     """
     Fixture to mock the database time for created_at and updated_at fields
